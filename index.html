@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Codebeautify.org Text to HTML Converter</title>
+	</head>
+	<body>
+		<p>
+			<!DOCTYPE html>
+			<html lang="en">
+				<head>
+					<meta charset="UTF-8">
+						<meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<title>Siggy AI</title>
+							<style>
+ 
+
+ 
+body{
+ 
+font-family: Arial, sans-serif;
+ 
+background:#0f172a;
+ 
+color:white;
+ 
+display:flex;
+ 
+justify-content:center;
+ 
+align-items:center;
+ 
+height:100vh;
+ 
+margin:0;
+ 
+}
+ 
+
+ 
+.chat-container{
+ 
+width:420px;
+ 
+height:620px;
+ 
+background:#1e293b;
+ 
+border-radius:20px;
+ 
+display:flex;
+ 
+flex-direction:column;
+ 
+overflow:hidden;
+ 
+box-shadow:0 0 30px rgba(0,0,0,0.4);
+ 
+}
+ 
+
+ 
+.header{
+ 
+background:#020617;
+ 
+padding:15px;
+ 
+font-weight:bold;
+ 
+text-align:center;
+ 
+font-size:18px;
+ 
+}
+ 
+
+ 
+.chat-box{
+ 
+flex:1;
+ 
+padding:15px;
+ 
+overflow-y:auto;
+ 
+}
+ 
+
+ 
+.message{
+ 
+margin-bottom:12px;
+ 
+padding:10px 14px;
+ 
+border-radius:12px;
+ 
+max-width:80%;
+ 
+}
+ 
+
+ 
+.user{
+ 
+background:#2563eb;
+ 
+align-self:flex-end;
+ 
+}
+ 
+
+ 
+.bot{
+ 
+background:#334155;
+ 
+}
+ 
+
+ 
+.input-area{
+ 
+display:flex;
+ 
+padding:10px;
+ 
+background:#020617;
+ 
+}
+ 
+
+ 
+input{
+ 
+flex:1;
+ 
+padding:10px;
+ 
+border-radius:8px;
+ 
+border:none;
+ 
+outline:none;
+ 
+}
+ 
+
+ 
+button{
+ 
+margin-left:8px;
+ 
+padding:10px 14px;
+ 
+border:none;
+ 
+border-radius:8px;
+ 
+background:#22c55e;
+ 
+color:white;
+ 
+cursor:pointer;
+ 
+}
+ 
+
+ 
+button:hover{
+ 
+background:#16a34a;
+ 
+}
+ 
+
+ 
+.analyze{
+ 
+background:#7c3aed;
+ 
+}
+ 
+
+ 
+</style>
+						</head>
+						<body>
+							<div class="chat-container">
+								<div class="header">
+ 
+🐈‍⬛ Siggy AI — Ritual Community Assistant
+ 
+</div>
+								<div id="chat" class="chat-box"></div>
+								<div class="input-area">
+									<input id="msg" placeholder="Ask Siggy..." />
+									<button onclick="send()">Send</button>
+									<button class="analyze" onclick="analyze()">Analyze</button>
+								</div>
+							</div>
+							<script>
+ 
+
+ 
+const WEBHOOK = "https://https://asceno.app.n8n.cloud/webhook-test/siggy chat/webhook/siggy-chat"
+ 
+
+ 
+
+ 
+function addMessage(text, type){
+ 
+
+ 
+const chat = document.getElementById("chat")
+ 
+
+ 
+const msg = document.createElement("div")
+ 
+msg.className = "message " + type
+ 
+msg.innerText = text
+ 
+
+ 
+chat.appendChild(msg)
+ 
+chat.scrollTop = chat.scrollHeight
+ 
+
+ 
+}
+ 
+
+ 
+
+ 
+async function send(){
+ 
+
+ 
+let message = document.getElementById("msg").value
+ 
+
+ 
+if(!message) return
+ 
+
+ 
+addMessage(message,"user")
+ 
+
+ 
+document.getElementById("msg").value=""
+ 
+
+ 
+let res = await fetch(WEBHOOK,{
+ 
+method:"POST",
+ 
+headers:{
+ 
+"Content-Type":"application/json"
+ 
+},
+ 
+body:JSON.stringify({
+ 
+message:message
+ 
+})
+ 
+})
+ 
+
+ 
+let data = await res.json()
+ 
+
+ 
+addMessage(data,"bot")
+ 
+
+ 
+}
+ 
+
+ 
+
+ 
+
+ 
+async function analyze(){
+ 
+
+ 
+let username = document.getElementById("msg").value
+ 
+
+ 
+if(!username.startsWith("@")){
+ 
+alert("Masukkan username X contoh: @nice_guyyy1")
+ 
+return
+ 
+}
+ 
+
+ 
+addMessage("Analyze "+username,"user")
+ 
+
+ 
+let res = await fetch(WEBHOOK,{
+ 
+method:"POST",
+ 
+headers:{
+ 
+"Content-Type":"application/json"
+ 
+},
+ 
+body:JSON.stringify({
+ 
+message:"Who is "+username+" in the Ritual community?"
+ 
+})
+ 
+})
+ 
+
+ 
+let data = await res.json()
+ 
+
+ 
+addMessage(data,"bot")
+ 
+
+ 
+}
+ 
+
+ 
+</script>
+						</body>
+					</html>
+				</p>
+			</body>
+		</html>
