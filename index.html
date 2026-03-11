@@ -411,15 +411,27 @@ header::after {
 .w-username-wrap {
   display: flex; align-items: center; gap: 10px;
   background: rgba(45,212,191,0.05);
-  border: 1px solid rgba(45,212,191,0.15);
-  border-radius: 12px; padding: 10px 14px;
-  width: 100%; max-width: 320px;
-  transition: border-color .2s;
+  border: 1px solid rgba(45,212,191,0.2);
+  border-radius: 14px; padding: 10px 10px 10px 14px;
+  width: 100%; max-width: 340px;
+  transition: border-color .2s, box-shadow .2s;
+  margin-top: 4px;
 }
 .w-username-wrap:focus-within {
-  border-color: rgba(45,212,191,0.45);
+  border-color: rgba(45,212,191,0.55);
   background: rgba(45,212,191,0.08);
+  box-shadow: 0 0 24px rgba(45,212,191,0.12);
 }
+.w-username-go {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: rgba(45,212,191,0.15);
+  border: 1px solid rgba(45,212,191,0.3);
+  color: var(--teal); cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s, transform .15s;
+}
+.w-username-go:hover { background: rgba(45,212,191,0.3); transform: translateX(1px); }
+.w-username-go svg { width: 15px; height: 15px; }
 .w-username-avatar {
   width: 32px; height: 32px; border-radius: 50%;
   background: rgba(45,212,191,0.12);
@@ -466,15 +478,6 @@ header::after {
     <div class="w-cap">🌙 English only</div>
   </div>
 
-  <!-- X Username Input -->
-  <div class="w-username-wrap">
-    <div class="w-username-avatar" id="w-av-preview">👤</div>
-    <span class="w-username-at">@</span>
-    <input id="w-username-input" type="text" placeholder="your X username" maxlength="15"
-      oninput="handleUsernameInput(this.value)" autocomplete="off" spellcheck="false">
-    <span class="w-username-badge" id="w-username-badge">X profile</span>
-  </div>
-
   <div class="w-chips">
     <div class="w-chip" onclick="startWith('What is ritual.net and its community?')">🌿 What is ritual.net?</div>
     <div class="w-chip" onclick="startWith('Analyze the ritual community on X/Twitter right now')">🐦 Ritual community on X</div>
@@ -482,10 +485,18 @@ header::after {
     <div class="w-chip" onclick="startWith('Who are you, Siggy? Tell me about yourself')">🐱 Who are you, Siggy?</div>
   </div>
 
-  <button class="w-btn" onclick="startChat()">
-    Start chatting
-    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-  </button>
+  <!-- X Username = Start Chat -->
+  <div class="w-username-wrap" id="w-username-wrap">
+    <div class="w-username-avatar" id="w-av-preview">👤</div>
+    <span class="w-username-at">@</span>
+    <input id="w-username-input" type="text" placeholder="enter X username to start" maxlength="15"
+      oninput="handleUsernameInput(this.value)"
+      onkeydown="if(event.key==='Enter') startChatWithUsername()"
+      autocomplete="off" spellcheck="false">
+    <button class="w-username-go" id="w-username-go" onclick="startChatWithUsername()" title="Start chatting">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
 
   <p class="w-footer">ritual.net &nbsp;·&nbsp; <span>Siggy AI v2</span></p>
 </div>
@@ -573,6 +584,11 @@ const sessionId = 'sess_' + Math.random().toString(36).slice(2, 12);
 let busy = false;
 
 // ── Welcome ──
+function startChatWithUsername() {
+  const val = (document.getElementById('w-username-input').value || '').trim();
+  if (val) loadXAvatar(val);
+  startChat();
+}
 function startChat() {
   document.getElementById('welcome').classList.add('out');
   setTimeout(() => addMsg('siggy', "✨ Hey, wanderer! I'm **Siggy** — the spirit woven into ritual.net since day one.\n\nI can **search the web**, check what's happening in the **ritual community on X**, and answer anything about this project. What brings you here today? 🌙"), 450);
@@ -680,13 +696,10 @@ function handleUsernameInput(val) {
   const input = document.getElementById('w-username-input');
   if (input.value !== clean) input.value = clean;
 
-  const badge = document.getElementById('w-username-badge');
   const preview = document.getElementById('w-av-preview');
 
   if (!clean) {
     preview.innerHTML = '👤';
-    badge.textContent = 'X profile';
-    badge.classList.remove('loaded');
     currentUserAvatar = '👤';
     return;
   }
@@ -696,15 +709,12 @@ function handleUsernameInput(val) {
     const url = `https://unavatar.io/twitter/${clean}`;
     const img = new Image();
     img.onload = () => {
-      preview.innerHTML = `<img src="${url}" alt="@${clean}">`;
-      badge.textContent = '@' + clean;
-      badge.classList.add('loaded');
+      preview.innerHTML = `<img src="${url}" alt="@${clean}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
       currentUserAvatar = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="@${clean}">`;
     };
     img.onerror = () => {
       preview.innerHTML = '👤';
-      badge.textContent = 'not found';
-      badge.classList.remove('loaded');
+      currentUserAvatar = '👤';
     };
     img.src = url;
   }, 600);
