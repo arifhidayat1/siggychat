@@ -407,6 +407,41 @@ header::after {
   font-size: 10.5px; color: var(--muted2); letter-spacing: 0.06em;
 }
 .w-footer span { color: rgba(45,212,191,0.3); }
+
+.w-username-wrap {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(45,212,191,0.05);
+  border: 1px solid rgba(45,212,191,0.15);
+  border-radius: 12px; padding: 10px 14px;
+  width: 100%; max-width: 320px;
+  transition: border-color .2s;
+}
+.w-username-wrap:focus-within {
+  border-color: rgba(45,212,191,0.45);
+  background: rgba(45,212,191,0.08);
+}
+.w-username-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(45,212,191,0.12);
+  overflow: hidden; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; transition: all .3s;
+  border: 1.5px solid rgba(45,212,191,0.2);
+}
+.w-username-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.w-username-at { color: var(--teal); font-weight: 700; font-size: 14px; flex-shrink: 0; }
+#w-username-input {
+  background: none; border: none; outline: none;
+  color: var(--fg); font-family: 'Syne', sans-serif;
+  font-size: 13.5px; width: 100%;
+}
+#w-username-input::placeholder { color: rgba(45,212,191,0.25); }
+.w-username-badge {
+  font-size: 10px; color: rgba(45,212,191,0.5);
+  flex-shrink: 0; letter-spacing: 0.04em;
+  transition: color .3s;
+}
+.w-username-badge.loaded { color: var(--teal); }
 </style>
 </head>
 <body>
@@ -429,6 +464,15 @@ header::after {
     <div class="w-cap">🐦 X/Twitter analysis</div>
     <div class="w-cap">🌿 ritual.net expert</div>
     <div class="w-cap">🌙 English only</div>
+  </div>
+
+  <!-- X Username Input -->
+  <div class="w-username-wrap">
+    <div class="w-username-avatar" id="w-av-preview">👤</div>
+    <span class="w-username-at">@</span>
+    <input id="w-username-input" type="text" placeholder="your X username" maxlength="15"
+      oninput="handleUsernameInput(this.value)" autocomplete="off" spellcheck="false">
+    <span class="w-username-badge" id="w-username-badge">X profile</span>
   </div>
 
   <div class="w-chips">
@@ -492,7 +536,7 @@ header::after {
     <button class="sug-btn" onclick="sendSug('Cerita tentang ritual.net dong')">🌿 ritual.net</button>
     <button class="sug-btn" onclick="sendSug('Analyze the ritual community on X right now')">🐦 Community on X</button>
     <button class="sug-btn" onclick="sendSug('Find the latest news about ritual on X')">🔍 Search news</button>
-    <button class="sug-btn" onclick="sendSug('Kamu bisa apa aja, Siggy?')">🐱 Kemampuan Siggy</button>
+    <button class="sug-btn" onclick="sendSug('What can you do, Siggy?')">🐱 Siggy's abilities</button>
     <button class="sug-btn" onclick="sendSug('Give me a mystical welcome message ✨')">✨ Mystical vibe</button>
   </div>
 
@@ -629,6 +673,42 @@ function checkLocalAnswer(text) {
 
 // ── X Avatar ──
 let currentUserAvatar = '👤';
+let usernameDebounce = null;
+
+function handleUsernameInput(val) {
+  const clean = val.replace(/[^A-Za-z0-9_]/g, '').slice(0, 15);
+  const input = document.getElementById('w-username-input');
+  if (input.value !== clean) input.value = clean;
+
+  const badge = document.getElementById('w-username-badge');
+  const preview = document.getElementById('w-av-preview');
+
+  if (!clean) {
+    preview.innerHTML = '👤';
+    badge.textContent = 'X profile';
+    badge.classList.remove('loaded');
+    currentUserAvatar = '👤';
+    return;
+  }
+
+  clearTimeout(usernameDebounce);
+  usernameDebounce = setTimeout(() => {
+    const url = `https://unavatar.io/twitter/${clean}`;
+    const img = new Image();
+    img.onload = () => {
+      preview.innerHTML = `<img src="${url}" alt="@${clean}">`;
+      badge.textContent = '@' + clean;
+      badge.classList.add('loaded');
+      currentUserAvatar = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="@${clean}">`;
+    };
+    img.onerror = () => {
+      preview.innerHTML = '👤';
+      badge.textContent = 'not found';
+      badge.classList.remove('loaded');
+    };
+    img.src = url;
+  }, 600);
+}
 
 function extractUsername(text) {
   const match = text.match(/@([A-Za-z0-9_]{1,15})/);
